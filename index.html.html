@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thrive Camp · Digital Forms</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/signature_pad/4.1.7/signature_pad.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;font-size:14px;background:#f5f6fa;color:#1a1a2e;display:flex;min-height:100vh}
+
+/* SIDEBAR */
+.sidebar{width:240px;background:#1a1a2e;min-height:100vh;display:flex;flex-direction:column;flex-shrink:0;position:fixed;top:0;left:0;bottom:0;z-index:100}
+.sidebar-logo{padding:20px 20px 16px;border-bottom:1px solid #2a2a3e;display:flex;align-items:center;gap:10px}
+.logo-icon{width:36px;height:36px;background:#e63946;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px;flex-shrink:0}
+.logo-text{color:#fff;font-weight:600;font-size:15px;line-height:1.2}
+.logo-sub{color:#8888aa;font-size:11px;font-weight:400}
+.sidebar-section{padding:16px 12px 8px;color:#8888aa;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;margin:2px 8px;color:#8888aa;cursor:pointer;font-size:13px;font-weight:500;transition:all 0.15s;border:none;background:none;width:calc(100% - 16px);text-align:left}
+.nav-item svg{width:18px;height:18px;flex-shrink:0}
+.nav-item:hover{background:#2a2a3e;color:#c8c8e8}
+.nav-item.active{background:#e63946;color:#fff}
+.nav-item.active svg{color:#fff}
+.sidebar-bottom{margin-top:auto;padding:16px;border-top:1px solid #2a2a3e}
+.user-info{display:flex;align-items:center;gap:10px}
+.user-avatar{width:32px;height:32px;background:#e63946;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:12px;flex-shrink:0}
+.user-name{color:#c8c8e8;font-size:13px;font-weight:500}
+.user-role{color:#8888aa;font-size:11px}
+
+/* MAIN */
+.main{margin-left:240px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+.topbar{background:#fff;border-bottom:1px solid #e8e8f0;padding:0 28px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.topbar-title{font-size:18px;font-weight:600;color:#1a1a2e}
+.topbar-right{display:flex;align-items:center;gap:16px}
+.live-badge{display:flex;align-items:center;gap:6px;background:#eafaf2;color:#1a7a4a;font-size:12px;font-weight:500;padding:5px 12px;border-radius:20px}
+.live-dot{width:7px;height:7px;border-radius:50%;background:#22c55e;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+
+/* CONTENT */
+.content{padding:28px;flex:1}
+.screen{display:none}.screen.active{display:block}
+
+/* CARDS */
+.card{background:#fff;border:1px solid #e8e8f0;border-radius:12px;padding:20px 24px;margin-bottom:16px}
+.card-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:#8888aa;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid #f0f0f8;display:flex;align-items:center;gap:8px}
+.card-title svg{width:14px;height:14px;color:#e63946}
+
+/* STATS */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
+.stat-card{background:#fff;border:1px solid #e8e8f0;border-radius:12px;padding:16px 20px}
+.stat-num{font-size:26px;font-weight:600;color:#1a1a2e}
+.stat-label{font-size:12px;color:#8888aa;margin-top:2px}
+.stat-accent{color:#e63946}
+
+/* FORM */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12px;font-weight:500;color:#555570;margin-bottom:5px}
+.field input,.field select,.field textarea{width:100%;padding:9px 12px;border:1px solid #e0e0ee;border-radius:8px;font-size:13px;font-family:'Inter',sans-serif;color:#1a1a2e;background:#fff;outline:none;transition:border 0.15s}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:#e63946;box-shadow:0 0 0 3px rgba(230,57,70,0.08)}
+.field textarea{resize:vertical;min-height:72px}
+
+/* CONSENT CHECKBOXES */
+.consent-list{display:flex;flex-direction:column;gap:12px}
+.consent-item{display:flex;align-items:flex-start;gap:12px;padding:12px;border-radius:8px;border:1px solid #f0f0f8;background:#fafafd;transition:background 0.1s}
+.consent-item.checked{background:#f0faf5;border-color:#c8ead8}
+.consent-item input[type=checkbox]{width:16px;height:16px;margin-top:1px;flex-shrink:0;accent-color:#e63946;cursor:pointer}
+.consent-item span{font-size:13px;color:#333355;line-height:1.55}
+
+/* SIGNATURE */
+.sig-wrap{border:1px solid #e0e0ee;border-radius:10px;overflow:hidden;background:#fafafa}
+canvas.sig-canvas{display:block;width:100%;height:120px;cursor:crosshair;touch-action:none}
+.sig-footer{display:flex;align-items:center;gap:10px;padding:8px 12px;border-top:1px solid #f0f0f8;background:#fff}
+.sig-status{font-size:11px;color:#aaa}
+.sig-clear{font-size:11px;padding:3px 10px;border:1px solid #e0e0ee;border-radius:6px;background:#fff;cursor:pointer;color:#555;font-family:'Inter',sans-serif}
+.sig-clear:hover{border-color:#e63946;color:#e63946}
+
+/* BUTTONS */
+.btn-primary{padding:11px 24px;background:#e63946;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;width:100%;margin-top:4px;transition:background 0.15s}
+.btn-primary:hover{background:#c1121f}
+.btn-outline{padding:8px 16px;background:#fff;border:1px solid #e0e0ee;border-radius:8px;font-size:13px;color:#555;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s}
+.btn-outline:hover{border-color:#e63946;color:#e63946}
+
+/* TOAST */
+.toast{position:fixed;top:20px;right:20px;background:#1a7a4a;color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:8px;z-index:999;transform:translateY(-80px);opacity:0;transition:all 0.3s}
+.toast.show{transform:translateY(0);opacity:1}
+
+/* RATING STARS */
+.star-row{display:flex;gap:6px}
+.star-btn{font-size:22px;background:none;border:none;cursor:pointer;color:#ddd;transition:color 0.1s;padding:2px;line-height:1}
+.star-btn.on{color:#f59e0b}
+
+/* SCALE (1-5) */
+.scale-wrap{display:flex;align-items:center;gap:16px;padding:12px 0}
+.scale-end-label{font-size:12px;color:#8888aa;font-weight:500;min-width:90px;white-space:nowrap}
+.scale-end-label:last-child{text-align:left}
+.scale-options{display:flex;gap:12px;align-items:center}
+.scale-opt{display:flex;flex-direction:column;align-items:center;cursor:pointer}
+.scale-opt input[type=radio]{display:none}
+.scale-btn{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:50%;border:2px solid #e0e0ee;font-size:15px;font-weight:600;color:#8888aa;cursor:pointer;transition:all 0.15s;background:#fff}
+.scale-opt input[type=radio]:checked + .scale-btn{background:#e63946;border-color:#e63946;color:#fff;transform:scale(1.1)}
+.scale-btn:hover{border-color:#e63946;color:#e63946}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto}
+table.data-tbl{width:100%;border-collapse:collapse;font-size:13px}
+table.data-tbl th{text-align:left;padding:10px 12px;border-bottom:2px solid #f0f0f8;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#8888aa}
+table.data-tbl td{padding:12px 12px;border-bottom:1px solid #f5f5fb;color:#1a1a2e;vertical-align:middle}
+table.data-tbl tr:hover td{background:#fafafd}
+.mono{font-family:monospace;font-size:12px;color:#333}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-male{background:#e8f0fe;color:#2255cc}
+.badge-female{background:#fce8f3;color:#a21070}
+.badge-pending{background:#fff3e0;color:#b45309}
+.badge-done{background:#e8faf0;color:#1a7a4a}
+.search-row{display:flex;gap:10px;margin-bottom:16px;align-items:center}
+.search-row input{flex:1;padding:9px 14px;border:1px solid #e0e0ee;border-radius:8px;font-size:13px;font-family:'Inter',sans-serif;outline:none}
+.search-row input:focus{border-color:#e63946}
+.empty-state{text-align:center;padding:40px 20px;color:#aaa;font-size:13px}
+
+/* LIVE SCREEN */
+.live-outer{background:#0d1117;border-radius:14px;padding:28px;min-height:500px}
+.live-header-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;padding-bottom:18px;border-bottom:1px solid #21262d}
+.live-app-name{color:#58a6ff;font-size:12px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase}
+.live-title-big{color:#e6edf3;font-size:18px;font-weight:600;margin-top:4px}
+.live-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:20px}
+.live-field{margin-bottom:20px}
+.live-label{font-size:10px;color:#8b949e;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px}
+.live-val{font-size:16px;color:#e6edf3;font-weight:500;padding-bottom:10px;border-bottom:1px solid #21262d;min-height:32px}
+.live-val.big{font-size:20px}
+.live-stars{color:#f59e0b;font-size:22px;letter-spacing:2px}
+.feedback-section-title{font-size:12px;color:#58a6ff;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;margin:20px 0 12px;padding-top:20px;border-top:1px solid #21262d}
+
+/* PAGE HEADER */
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.page-title{font-size:20px;font-weight:600;color:#1a1a2e}
+.page-sub{font-size:13px;color:#8888aa;margin-top:2px}
+
+/* STUDY INFO BOX */
+.study-info-box{background:#fff8f8;border:1px solid #fce0e2;border-radius:10px;padding:14px 18px;margin-bottom:16px;font-size:13px;color:#555570;line-height:1.6}
+.study-info-box strong{color:#c1121f;font-weight:600}
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">TC</div>
+    <div>
+      <div class="logo-text">Thrive Camp</div>
+      <div class="logo-sub">IIT Kharagpur</div>
+    </div>
+  </div>
+  <div class="sidebar-section">Forms</div>
+  <button class="nav-item active" onclick="showScreen('consent',this)">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+    Consent Form
+  </button>
+  <button class="nav-item" onclick="showScreen('feedback',this)">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+    Feedback Form
+  </button>
+  <div class="sidebar-section">Records</div>
+  <button class="nav-item" onclick="showScreen('patients',this)">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+    Patient Records
+  </button>
+  <div class="sidebar-section">Display</div>
+  <button class="nav-item" onclick="showScreen('display',this)">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+    Display Screen
+  </button>
+  <div class="sidebar-bottom">
+    <div class="user-info">
+      <div class="user-avatar">ST</div>
+      <div>
+        <div class="user-name">Staff</div>
+        <div class="user-role">Thrive Camp Admin</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="topbar-title">Consent Form</div>
+    <div class="topbar-right">
+      <div class="live-badge"><div class="live-dot"></div>Live System</div>
+    </div>
+  </div>
+  <div class="content">
+
+    <!-- CONSENT -->
+    <div id="screen-consent" class="screen active">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Informed Consent Form</div>
+          <div class="page-sub">Clinical Performance Evaluation · Device Registration</div>
+        </div>
+      </div>
+      <div class="study-info-box">
+        <strong>Study:</strong> Clinical Performance Evaluation of Non-Invasive Hemoglobin and Glucose Screening Device, IIT Kharagpur.<br>
+        The medical team has thoroughly explained the study procedures and purpose. Participation is entirely voluntary and the patient may withdraw at any time.
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+          Study Identifiers
+        </div>
+        <div class="grid3">
+          <div class="field"><label>Setu ID</label><input type="text" id="c-setu" placeholder="e.g. 0989-9000"></div>
+          <div class="field"><label>Patient ID</label><input type="text" id="c-pid" placeholder="e.g. 000323"></div>
+          <div class="field"><label>Device / Study Type</label>
+            <select id="c-device">
+              <option value="">Select device</option>
+              <option>Device-1 (Fasting)</option>
+              <option>Device-1 (Post-prandial)</option>
+              <option>Device-2 (Oro-Screening)</option>
+              <option>Device-3 (Hemoglobin)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+          Patient Details
+        </div>
+        <div class="grid2">
+          <div class="field"><label>First Name</label><input type="text" id="c-fname"></div>
+          <div class="field"><label>Last Name</label><input type="text" id="c-lname"></div>
+          <div class="field"><label>Age</label><input type="number" id="c-age" min="18" max="99"></div>
+          <div class="field"><label>Gender</label>
+            <select id="c-gender"><option value="">Select</option><option>Male</option><option>Female</option><option>Other</option></select>
+          </div>
+          <div class="field"><label>Phone Number</label><input type="tel" id="c-phone"></div>
+          <div class="field"><label>Email Address</label><input type="email" id="c-email"></div>
+        </div>
+        <div class="field"><label>Address</label><input type="text" id="c-address" placeholder="Full address"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          Informed Consent Declarations
+        </div>
+        <p style="font-size:12px;color:#8888aa;margin-bottom:14px">Patient must read and confirm each declaration by checking the box.</p>
+        <div class="consent-list">
+          <label class="consent-item" id="ci1"><input type="checkbox" onchange="toggleConsent('ci1')"> <span>The study procedures and purpose of this clinical study focused on non-invasive hemoglobin/glucose/oral monitoring have been thoroughly explained to me. I have fully understood their research objectives and protocol.</span></label>
+          <label class="consent-item" id="ci2"><input type="checkbox" onchange="toggleConsent('ci2')"> <span>I have been given the chance to reflect on this information, pose questions, and have received satisfactory answers to all my inquiries.</span></label>
+          <label class="consent-item" id="ci3"><input type="checkbox" onchange="toggleConsent('ci3')"> <span>I understand that my participation in this study is entirely voluntary, and I retain the right to withdraw at any moment without providing any reason.</span></label>
+          <label class="consent-item" id="ci4"><input type="checkbox" onchange="toggleConsent('ci4')"> <span>I consent to participate in the specified research work and agree to provide a portion of my blood/sample for testing at the designated testing center. I acknowledge that these samples will be used solely for research purposes.</span></label>
+          <label class="consent-item" id="ci5"><input type="checkbox" onchange="toggleConsent('ci5')"> <span>I have been assured that all my personal identification information will be kept confidential and secure, with no such details being disclosed publicly.</span></label>
+          <label class="consent-item" id="ci6"><input type="checkbox" onchange="toggleConsent('ci6')"> <span>I will not have any financial involvement or related benefit concerning this project. I can withdraw at any point by informing the investigators.</span></label>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+          Patient Signature
+        </div>
+        <p style="font-size:12px;color:#8888aa;margin-bottom:10px">Sign below using a finger or stylus on a touchscreen/touchpad.</p>
+        <div class="sig-wrap">
+          <canvas class="sig-canvas" id="sig-patient"></canvas>
+          <div class="sig-footer">
+            <button class="sig-clear" onclick="clearSig('sig-patient','sig-p-status')">Clear</button>
+            <span class="sig-status" id="sig-p-status">No signature yet</span>
+          </div>
+        </div>
+        <div style="margin-top:14px" class="grid2">
+          <div class="field"><label>Patient Name (print)</label><input type="text" id="c-pname-print" placeholder="Full name"></div>
+          <div class="field"><label>Date</label><input type="date" id="c-date"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          Consent Taken By (Staff)
+        </div>
+        <div class="grid2">
+          <div class="field"><label>Staff Name</label><input type="text" id="c-staff-name"></div>
+          <div class="field"><label>Date</label><input type="date" id="c-staff-date"></div>
+        </div>
+        <label style="font-size:12px;font-weight:500;color:#555570;display:block;margin-bottom:6px">Staff Signature</label>
+        <div class="sig-wrap">
+          <canvas class="sig-canvas" id="sig-staff"></canvas>
+          <div class="sig-footer">
+            <button class="sig-clear" onclick="clearSig('sig-staff','sig-s-status')">Clear</button>
+            <span class="sig-status" id="sig-s-status">No signature yet</span>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-primary" onclick="submitConsent()">Submit Consent Form</button>
+    </div>
+
+    <!-- FEEDBACK -->
+    <div id="screen-feedback" class="screen">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Health Camp Feedback</div>
+          <div class="page-sub">Post-visit patient feedback · Live display enabled</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+          Patient Identification
+        </div>
+        <div class="grid2">
+          <div class="field"><label>Setu ID <span style="color:#e63946">*</span></label><input type="text" id="f-setu" oninput="syncLive()" placeholder="e.g. 0989-9000"></div>
+          <div class="field"><label>Patient ID <span style="color:#e63946">*</span></label><input type="text" id="f-pid" oninput="syncLive()" placeholder="e.g. 000323"></div>
+        </div>
+      </div>
+
+      <!-- Q1 -->
+      <div class="card">
+        <div class="card-title">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+          Screening Experience Ratings
+        </div>
+        <p style="font-size:12px;color:#8888aa;margin-bottom:20px">Rate each aspect on a scale of 1 to 5. All questions are required.</p>
+
+        <!-- Scale Q1 -->
+        <div style="margin-bottom:24px">
+          <p style="font-size:14px;font-weight:500;color:#1a1a2e;margin-bottom:14px">On a scale of 1–5, how satisfied are you with the health screening process? <span style="color:#e63946">*</span></p>
+          <div class="scale-wrap">
+            <span class="scale-end-label">Dissatisfied</span>
+            <div class="scale-options" id="sq1">
+              <label class="scale-opt"><input type="radio" name="sq1" value="1"><span class="scale-btn">1</span></label>
+              <label class="scale-opt"><input type="radio" name="sq1" value="2"><span class="scale-btn">2</span></label>
+              <label class="scale-opt"><input type="radio" name="sq1" value="3"><span class="scale-btn">3</span></label>
+              <label class="scale-opt"><input type="radio" name="sq1" value="4"><span class="scale-btn">4</span></label>
+              <label class="scale-opt"><input type="radio" name="sq1" value="5"><span class="scale-btn">5</span></label>
+            </div>
+            <span class="scale-end-label">Satisfied</span>
+          </div>
+        </div>
+
+        <!-- Scale Q2 -->
+        <div style="margin-bottom:24px">
+          <p style="font-size:14px;font-weight:500;color:#1a1a2e;margin-bottom:14px">Were the steps of the screening process clearly explained to you? <span style="color:#e63946">*</span></p>
+          <div class="scale-wrap">
+            <span class="scale-end-label">Unclear</span>
+            <div class="scale-options" id="sq2">
+              <label class="scale-opt"><input type="radio" name="sq2" value="1"><span class="scale-btn">1</span></label>
+              <label class="scale-opt"><input type="radio" name="sq2" value="2"><span class="scale-btn">2</span></label>
+              <label class="scale-opt"><input type="radio" name="sq2" value="3"><span class="scale-btn">3</span></label>
+              <label class="scale-opt"><input type="radio" name="sq2" value="4"><span class="scale-btn">4</span></label>
+              <label class="scale-opt"><input type="radio" name="sq2" value="5"><span class="scale-btn">5</span></label>
+            </div>
+            <span class="scale-end-label">Clear</span>
+          </div>
+        </div>
+
+        <!-- Scale Q3 -->
+        <div style="margin-bottom:24px">
+          <p style="font-size:14px;font-weight:500;color:#1a1a2e;margin-bottom:14px">Did you feel comfortable and your privacy was respected during the screening? <span style="color:#e63946">*</span></p>
+          <div class="scale-wrap">
+            <span class="scale-end-label">Uncomfortable</span>
+            <div class="scale-options" id="sq3">
+              <label class="scale-opt"><input type="radio" name="sq3" value="1"><span class="scale-btn">1</span></label>
+              <label class="scale-opt"><input type="radio" name="sq3" value="2"><span class="scale-btn">2</span></label>
+              <label class="scale-opt"><input type="radio" name="sq3" value="3"><span class="scale-btn">3</span></label>
+              <label class="scale-opt"><input type="radio" name="sq3" value="4"><span class="scale-btn">4</span></label>
+              <label class="scale-opt"><input type="radio" name="sq3" value="5"><span class="scale-btn">5</span></label>
+            </div>
+            <span class="scale-end-label">Comfortable</span>
+          </div>
+        </div>
+
+        <!-- Scale Q4 -->
+        <div>
+          <p style="font-size:14px;font-weight:500;color:#1a1a2e;margin-bottom:14px">Do you feel this screening helped you understand your health better? <span style="color:#e63946">*</span></p>
+          <div class="scale-wrap">
+            <span class="scale-end-label">No</span>
+            <div class="scale-options" id="sq4">
+              <label class="scale-opt"><input type="radio" name="sq4" value="1"><span class="scale-btn">1</span></label>
+              <label class="scale-opt"><input type="radio" name="sq4" value="2"><span class="scale-btn">2</span></label>
+              <label class="scale-opt"><input type="radio" name="sq4" value="3"><span class="scale-btn">3</span></label>
+              <label class="scale-opt"><input type="radio" name="sq4" value="4"><span class="scale-btn">4</span></label>
+              <label class="scale-opt"><input type="radio" name="sq4" value="5"><span class="scale-btn">5</span></label>
+            </div>
+            <span class="scale-end-label">Yes</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Open text -->
+      <div class="card">
+        <div class="card-title">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+          Additional Comments
+        </div>
+        <div class="field">
+          <label>How can we improve the screening experience? <span style="color:#e63946">*</span></label>
+          <textarea id="f-improve" oninput="syncLive()" placeholder="Your answer..." rows="4"></textarea>
+        </div>
+      </div>
+
+      <button class="btn-primary" onclick="submitFeedback()">Submit Feedback</button>
+    </div>
+
+    <!-- PATIENTS -->
+    <div id="screen-patients" class="screen">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Patient Records</div>
+          <div class="page-sub">All registered patients at Thrive Camp</div>
+        </div>
+      </div>
+      <div class="stat-row">
+        <div class="stat-card"><div class="stat-num" id="s-total">0</div><div class="stat-label">Total Patients</div></div>
+        <div class="stat-card"><div class="stat-num stat-accent" id="s-male">0</div><div class="stat-label">Male</div></div>
+        <div class="stat-card"><div class="stat-num" id="s-female">0</div><div class="stat-label">Female</div></div>
+        <div class="stat-card"><div class="stat-num" id="s-today">0</div><div class="stat-label">Registered Today</div></div>
+      </div>
+      <div class="card" style="padding:16px 24px">
+        <div class="search-row">
+          <input type="text" id="search-q" placeholder="Search by name, Setu ID or Patient ID..." oninput="renderTable()">
+          <button class="btn-outline" onclick="renderTable()">Search</button>
+        </div>
+        <div class="tbl-wrap">
+          <table class="data-tbl">
+            <thead><tr><th>#</th><th>Setu ID</th><th>Patient ID</th><th>Name</th><th>Age</th><th>Gender</th><th>Device</th><th>Date</th></tr></thead>
+            <tbody id="tbl-body"></tbody>
+          </table>
+          <div class="empty-state" id="tbl-empty">No patients registered yet. Fill in a consent form to get started.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DISPLAY -->
+    <div id="screen-display" class="screen">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Display Screen</div>
+          <div class="page-sub">Mirror this on the secondary monitor — updates live as feedback is entered</div>
+        </div>
+      </div>
+      <div class="live-outer">
+        <div class="live-header-bar">
+          <div>
+            <div class="live-app-name">Thrive Camp · IIT Kharagpur</div>
+            <div class="live-title-big">Patient Feedback — Live View</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;color:#22c55e;font-size:13px;font-weight:500">
+            <div class="live-dot"></div> Live
+          </div>
+        </div>
+        <div class="live-grid">
+          <div>
+            <div class="live-field"><div class="live-label">Setu ID</div><div class="live-val mono" id="ld-setu">—</div></div>
+            <div class="live-field"><div class="live-label">Patient ID</div><div class="live-val mono" id="ld-pid">—</div></div>
+          </div>
+          <div>
+            <div class="live-field"><div class="live-label">Overall Experience</div><div class="live-val" id="ld-overall">—</div></div>
+            <div class="live-field"><div class="live-label">Staff Helpfulness</div><div class="live-val" id="ld-staff">—</div></div>
+          </div>
+        </div>
+        <div class="feedback-section-title">Written Feedback</div>
+        <div class="live-field"><div class="live-label">What went well</div><div class="live-val" id="ld-good" style="min-height:36px">—</div></div>
+        <div class="live-field"><div class="live-label">Suggestions for improvement</div><div class="live-val" id="ld-improve" style="min-height:36px">—</div></div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+var patients=[];
+var sigPads={};
+var ratings={overall:0,staff:0,comfort:0,clarity:0};
+
+function showScreen(name,btn){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});
+  document.querySelectorAll('.nav-item').forEach(function(b){b.classList.remove('active')});
+  document.getElementById('screen-'+name).classList.add('active');
+  if(btn) btn.classList.add('active');
+  var titles={consent:'Consent Form',feedback:'Feedback Form',patients:'Patient Records',display:'Display Screen'};
+  document.getElementById('topbar-title').textContent=titles[name]||name;
+  if(name==='patients') renderTable();
+}
+
+function initSig(id){
+  var canvas=document.getElementById(id);
+  var dpr=window.devicePixelRatio||1;
+  var w=canvas.offsetWidth||600;
+  canvas.width=w*dpr;canvas.height=120*dpr;
+  canvas.getContext('2d').scale(dpr,dpr);
+  var sp=new SignaturePad(canvas,{penColor:'#1a1a2e',backgroundColor:'rgba(0,0,0,0)',minWidth:1.5,maxWidth:2.5});
+  sp.addEventListener('endStroke',function(){
+    var statusId=id==='sig-patient'?'sig-p-status':'sig-s-status';
+    document.getElementById(statusId).textContent='✓ Signature captured';
+  });
+  sigPads[id]=sp;
+}
+
+function clearSig(id,statusId){
+  sigPads[id].clear();
+  document.getElementById(statusId).textContent='No signature yet';
+}
+
+function toggleConsent(id){
+  var el=document.getElementById(id);
+  if(el.querySelector('input').checked) el.classList.add('checked');
+  else el.classList.remove('checked');
+}
+
+function buildStars(groupId,key){
+  var el=document.getElementById(groupId);
+  for(var i=1;i<=5;i++){
+    (function(v){
+      var b=document.createElement('button');
+      b.className='star-btn';b.textContent='★';b.setAttribute('data-k',key);b.setAttribute('data-v',v);
+      b.onclick=function(){
+        ratings[key]=v;
+        document.querySelectorAll('.star-btn[data-k="'+key+'"]').forEach(function(s,idx){s.className='star-btn'+(idx<v?' on':'')});
+        syncLive();
+      };
+      el.appendChild(b);
+    })(i);
+  }
+}
+
+function getScale(name){
+  var el=document.querySelector('input[name="'+name+'"]:checked');
+  return el?el.value:'—';
+}
+function syncLive(){
+  document.getElementById('ld-setu').textContent=document.getElementById('f-setu').value||'—';
+  document.getElementById('ld-pid').textContent=document.getElementById('f-pid').value||'—';
+  var v=getScale('sq1');
+  document.getElementById('ld-overall').textContent=v!=='—'?v+' / 5':'—';
+  var v2=getScale('sq2');
+  document.getElementById('ld-staff').textContent=v2!=='—'?v2+' / 5':'—';
+  document.getElementById('ld-improve').textContent=document.getElementById('f-improve').value||'—';
+  document.getElementById('ld-good').textContent=(function(){
+    var v3=getScale('sq3'),v4=getScale('sq4');
+    return (v3!=='—'?'Privacy: '+v3+'/5  ':'')+( v4!=='—'?'Health understanding: '+v4+'/5':'');
+  })()||'—';
+}
+
+function showToast(msg,ok){
+  var t=document.getElementById('toast');
+  t.style.background=ok?'#1a7a4a':'#c1121f';
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show')},3500);
+}
+
+function submitConsent(){
+  var setu=document.getElementById('c-setu').value.trim();
+  var pid=document.getElementById('c-pid').value.trim();
+  var fname=document.getElementById('c-fname').value.trim();
+  if(!setu||!pid||!fname){showToast('Please fill in Setu ID, Patient ID and patient name.',false);return;}
+  var allChecked=['ci1','ci2','ci3','ci4','ci5','ci6'].every(function(id){return document.getElementById(id).querySelector('input').checked});
+  if(!allChecked){showToast('Patient must confirm all 6 consent declarations.',false);return;}
+  var today=new Date().toISOString().split('T')[0];
+  patients.push({setu:setu,pid:pid,name:fname+' '+document.getElementById('c-lname').value.trim(),age:document.getElementById('c-age').value,gender:document.getElementById('c-gender').value||'—',device:document.getElementById('c-device').value||'—',date:document.getElementById('c-date').value||today,regDate:today});
+  showToast('✓ Consent form submitted. Patient registered.',true);
+  updateStats();
+}
+
+function submitFeedback(){
+  var setu=document.getElementById('f-setu').value.trim();
+  if(!setu){showToast('Please enter the Setu ID.',false);return;}
+  var allScales=['sq1','sq2','sq3','sq4'].every(function(n){return document.querySelector('input[name="'+n+'"]:checked')});
+  if(!allScales){showToast('Please answer all rating questions.',false);return;}
+  var improve=document.getElementById('f-improve').value.trim();
+  if(!improve){showToast('Please fill in the improvement suggestion.',false);return;}
+  showToast('✓ Feedback submitted successfully.',true);
+  document.getElementById('f-setu').value='';
+  document.getElementById('f-pid').value='';
+  document.getElementById('f-improve').value='';
+  document.querySelectorAll('input[type=radio]').forEach(function(r){r.checked=false});
+  syncLive();
+}
+
+function renderTable(){
+  var q=(document.getElementById('search-q').value||'').toLowerCase();
+  var rows=patients.filter(function(p){return p.name.toLowerCase().includes(q)||p.setu.toLowerCase().includes(q)||p.pid.toLowerCase().includes(q)});
+  var tbody=document.getElementById('tbl-body');
+  var empty=document.getElementById('tbl-empty');
+  if(!rows.length){tbody.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  tbody.innerHTML=rows.map(function(p,i){
+    return '<tr><td style="color:#aaa">'+(i+1)+'</td><td class="mono">'+p.setu+'</td><td class="mono">'+p.pid+'</td><td style="font-weight:500">'+p.name+'</td><td>'+p.age+'</td><td><span class="badge '+(p.gender==='Male'?'badge-male':'badge-female')+'">'+p.gender+'</span></td><td style="color:#8888aa;font-size:12px">'+p.device+'</td><td style="color:#8888aa;font-size:12px">'+p.date+'</td></tr>';
+  }).join('');
+}
+
+function updateStats(){
+  var today=new Date().toISOString().split('T')[0];
+  document.getElementById('s-total').textContent=patients.length;
+  document.getElementById('s-male').textContent=patients.filter(function(p){return p.gender==='Male'}).length;
+  document.getElementById('s-female').textContent=patients.filter(function(p){return p.gender==='Female'}).length;
+  document.getElementById('s-today').textContent=patients.filter(function(p){return p.regDate===today}).length;
+}
+
+window.addEventListener('load',function(){
+  setTimeout(function(){initSig('sig-patient');initSig('sig-staff');},200);
+  // wire scale radios to live sync
+  document.querySelectorAll('input[type=radio]').forEach(function(r){r.addEventListener('change',syncLive)});
+  var today=new Date().toISOString().split('T')[0];
+  document.getElementById('c-date').value=today;document.getElementById('c-staff-date').value=today;
+  updateStats();renderTable();
+});
+</script>
+</body>
+</html>
